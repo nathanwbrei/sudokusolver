@@ -4,15 +4,16 @@ import Lib
 import Data.Array
 import Data.List
 
-data Cell = Solved Int 
-          | Unsolved [Int] deriving Show
+type Value = Int
+type Index = (Int, Int)
 
-newtype Sudoku = Sudoku (Array (Int, Int) Cell)
+data Cell = Solved Value
+          | Unsolved [Value] deriving Show
+
+newtype Sudoku = Sudoku (Array Index Cell)
 
 
-
-
-instance Show Sudoku where+
+instance Show Sudoku where
     show (Sudoku s) = "\n" ++ blocksquare ++ "\n"
         where blocksquare = intercalate "\n\n" [blockrow bi  | bi <- [0..2]]
               blockrow bi = intercalate "\n"   [row (3*bi+i) | i <- [0..2]]
@@ -36,16 +37,16 @@ desudoku s = f s indices
                                                otherwise    -> f s rest
 
 
-putCell :: Sudoku -> (Int, Int) -> Cell -> Sudoku
+putCell :: Sudoku -> Index -> Cell -> Sudoku
 putCell (Sudoku s) (x,y) cell = Sudoku $ s // [((x,y), cell)]
 
-getCell :: Sudoku -> (Int, Int) -> Cell
+getCell :: Sudoku -> Index -> Cell
 getCell (Sudoku s) idx = s ! idx
 
-transformCell :: Sudoku -> (Cell -> Cell) -> (Int, Int) -> Sudoku
+transformCell :: Sudoku -> (Cell -> Cell) -> Index -> Sudoku
 transformCell s f idx = putCell s idx $ f (getCell s idx)
 
-transformCells :: Sudoku -> (Cell -> Cell) -> [(Int, Int)] -> Sudoku
+transformCells :: Sudoku -> (Cell -> Cell) -> [Index] -> Sudoku
 transformCells s f [] = s
 transformCells s f (idx:rest) = transformCells (transformCell s f idx) f rest
 
@@ -67,18 +68,18 @@ promote (Unsolved l) | (length l == 1) = Solved $ head l
 promote (Unsolved l) | otherwise       = Unsolved l
 
 
-eliminate :: Int -> Cell -> Cell
+eliminate :: Value -> Cell -> Cell
 eliminate value (Unsolved l) = Unsolved $ delete value l
 eliminate _ cell = cell
 
 
-rowIndices :: (Int,Int) -> [(Int,Int)]
+rowIndices :: Index -> [Index]
 rowIndices (r,c) = [(r, cc) | cc <- [0..8], cc /= c]
 
-colIndices :: (Int,Int) -> [(Int,Int)]
+colIndices :: Index -> [Index]
 colIndices (r,c) = [(rr, c) | rr <- [0..8], rr /= r]
 
-blockIndices :: (Int,Int) -> [(Int,Int)]
+blockIndices :: Index -> [Index]
 blockIndices (r_initial, c_initial) = [(r,c) | r <- [r_start..r_end], 
                                                c <- [c_start..c_end], 
                                                r /= r_initial || c /= c_initial]
@@ -90,7 +91,7 @@ blockIndices (r_initial, c_initial) = [(r,c) | r <- [r_start..r_end],
 
 
 
-pruneAroundCell :: Sudoku -> (Int,Int) -> Int -> Sudoku
+pruneAroundCell :: Sudoku -> Index -> Value -> Sudoku
 pruneAroundCell s idx value = transformCells s (promote . (eliminate value)) indices 
   where
     indices = nub $ (rowIndices idx) ++ (colIndices idx) ++ (blockIndices idx)
