@@ -1,0 +1,114 @@
+
+
+Before, with synonyms on every line: 
+
+
+Terminator
+	T-800, Arnold
+	T-1000, Robert
+
+
+Currently, with each synonym on its own line:
+
+
+Terminator
+	T-800
+		Arnold
+	T-1000
+		Robert
+
+
+This is technically incorrect because it makes no distinction between abstraction ("subvariants") and equality ("synonyms"). For now this doesn't matter very much in practice. If we write the taxonomies keeping all synonyms on one line like before, we can auto-generate the new (information-losing, incorrect) version with each synonym on its own line. 
+
+The example in yesterday's email complicates things. Consider:
+
+Terminator
+	T-800
+		Arnold
+		T-800A
+		T-800B
+
+	T-1000
+		Robert
+
+
+Problem: According to reality: 
+
+	"T-800" = "Arnold"
+	"T-800A" <: "T-800"
+	"T-800B" <: "T-800"
+	Therefore, "T-800B" = "Arnold"
+
+	According to the data model:
+	"Arnold" <: "T-800"
+	"T-800A" <: "T-800"
+	"T-800B" <: "T-800"
+	Therefore, "T-800B" != "Arnold"
+
+
+One solution is to make sure that only the preferred term may have subvariants. This forces the preferred term to be "T-800"
+
+Terminator
+	T-800, Arnold
+		T-800A
+		T-800B
+
+	T-1000, Robert
+
+
+The other solution is to extend the syntax of the taxonomy file to differentiate between subvariants and synonyms even on separate lines: 
+Now, 
+
+Terminator
+	Arnold
+	> T-800
+		T-800A
+		T-800B
+
+	T-1000
+	> Robert
+
+By prepending some lines with a special symbol, we demarcate 
+For now I am using "|" because it is consistent with BNF.
+
+Terminator
+	Arnold
+	| T-800
+		T-800A
+		| Bad Terminator
+		T-800B
+		| Good Terminator
+
+	Robert 
+	| T-1000
+
+
+This would be useful for entering data correctly and futureproofing: A simple script can project this back onto the old, incorrect format so that the tools that ingest the taxonomies don't need to be changed.
+
+
+It also solves the problem of different synonyms having different subvariants
+
+Terminator
+	Arnold
+		Schwarzenegger
+	> T-800
+		T-800A
+		T-800B
+
+	T-1000
+	> Robert
+
+Now, 
+	Schwarzenegger <: Arnold 
+	T-800A <: T-800
+	T-800A ~ Arnold
+	T-800A ~ Schwarzenegger
+	T-800B ~ Arnold
+	T-800A != T-800B
+
+
+
+
+
+
+
