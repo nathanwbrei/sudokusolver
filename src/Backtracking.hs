@@ -1,7 +1,8 @@
 module Backtracking
     (   choose_guess,
         apply_guess,
-        solve
+        solve,
+        itersolve
     ) where
 
 import Sudoku
@@ -29,15 +30,26 @@ choose_guess s = foldl f Nothing [(r,c) | r <- [0..8], c <- [0..8]]
 apply_guess :: Sudoku -> Maybe (Index, [Value]) -> [Sudoku]
 apply_guess s Nothing          = []
 apply_guess s (Just (_, []))   = []
-apply_guess s (Just (i, v:vs)) = putCell s i (Solved v) : apply_guess s (i, vs)
+apply_guess s (Just (i, v:vs)) = putCell s i (Solved v) : apply_guess s (Just (i, vs))
 
 
 
 -- Do a depth-first search through the solution space
-solve :: Sudoku -> Sudoku
-solve s = f s (progress s) where
-    f s p = if p' /= p then f s' p' else s'
-        where
-            ss = pruneRepeated s
-            s' = undefined
-            p' = progress s'
+solve :: Sudoku -> Maybe Sudoku
+solve s = _solve [s] where
+    _solve [] = Nothing
+    _solve (s:ss) | not (isValid s') = _solve ss
+                  | progress s' == 0 = Just s'
+                  | otherwise = _solve ((apply_guess s' (choose_guess s')) ++ ss)
+        where s' = pruneRepeated s
+
+
+itersolve :: Sudoku -> [Sudoku]
+itersolve s = _solve [s] where
+    _solve [] = []
+    _solve (s:ss) | not (isValid s') = _solve ss
+                  | progress s' == 0 = [s']
+                  | otherwise = s : (s' : (_solve ((apply_guess s' (choose_guess s')) ++ ss)))
+        where s' = pruneRepeated s
+
+

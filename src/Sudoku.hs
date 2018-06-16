@@ -5,7 +5,7 @@ module Sudoku
         Sudoku (Sudoku),
         Cell (Solved, Unsolved),
         sudoku, desudoku,
-        getCell, putCell, transformCell, transformCells
+        getCell, putCell, transformCell, transformCells, mapCells, isValid
     ) where
 
 

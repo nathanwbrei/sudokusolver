@@ -1,7 +1,6 @@
 
 module Elimination
-    ( 
-        prune, 
+    (   prune, 
         pruneRepeated, 
         progress
     ) where
@@ -20,7 +19,8 @@ promote (Unsolved l) | otherwise       = Unsolved l
 
 eliminate :: Value -> Cell -> Cell
 eliminate value (Unsolved l) = Unsolved $ delete value l
-eliminate _ cell = cell
+eliminate value (Solved v) | value == v = Unsolved []
+                           | otherwise  = Solved v
 
 
 rowIndices :: Index -> [Index]
@@ -42,7 +42,7 @@ blockIndices (r_initial, c_initial) = [(r,c) | r <- [r_start..r_end],
 
 
 pruneAroundCell :: Sudoku -> Index -> Value -> Sudoku
-pruneAroundCell s idx value = transformCells s (promote . (eliminate value)) indices 
+pruneAroundCell s idx value = transformCells s (eliminate value) indices 
   where
     indices = nub $ (rowIndices idx) ++ (colIndices idx) ++ (blockIndices idx)
 
@@ -66,7 +66,7 @@ pruneRepeated s = f s (progress s)
   where
     f s p = if (p' == p) then s' else f s' p'
             where
-              s' = prune s
+              s' = mapCells (prune s) promote
               p' = progress s'
 
 
