@@ -35,11 +35,11 @@ apply_guess s (Just (i, v:vs)) = putCell s i (Solved v) : apply_guess s (Just (i
 
 
 -- Do a depth-first search through the solution space
-solve :: Sudoku -> Maybe Sudoku
+solve :: Sudoku -> Either Error Sudoku
 solve s = _solve [s] where
-    _solve [] = Nothing
+    _solve [] = Left SolveError
     _solve (s:ss) | not (isValid s') = _solve ss
-                  | progress s' == 0 = Just s'
+                  | progress s' == 0 = Right s'
                   | otherwise = _solve ((apply_guess s' (choose_guess s')) ++ ss)
         where s' = pruneRepeated s
 

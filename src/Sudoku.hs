@@ -4,6 +4,7 @@ module Sudoku
         Index,
         Sudoku (Sudoku),
         Cell (Solved, Unsolved),
+        Error (FileError, ParseError, SolveError),
         sudoku, desudoku,
         getCell, putCell, transformCell, transformCells, mapCells, isValid
     ) where
@@ -20,6 +21,11 @@ data Cell = Solved Value
           | Unsolved [Value] deriving Show
 
 newtype Sudoku = Sudoku (Array Index Cell)
+
+data Error = FileError FilePath IOError
+           | ParseError
+           | SolveError
+             deriving Show
 
 
 
