@@ -74,7 +74,9 @@ safeReadFile path = catchIOError success failure
 
 
 printResult :: (Either Error Sudoku) -> IO ()
-printResult (Left err)   = print err
+printResult (Left (FileError path _)) = putStrLn ("Unable to open file " ++ path)
+printResult (Left (ParseError)) = putStrLn "Unable to parse file"
+printResult (Left (SolveError)) = putStrLn "Unable to solve file"
 printResult (Right soln) = print soln
 
 
