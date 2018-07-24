@@ -2,7 +2,7 @@
 
 
 module Deelimination
-    (   count, deeliminate, all_indices
+    (   count, deeliminate, all_indices, deeliminate_all
     ) where
 
 
@@ -50,10 +50,14 @@ all_indices = rows ++ cols ++ blocks
     blocks = [[(r,c) | r <- [br..br+2], c <- [bc..bc+2]] 
                      | br <- [0,3,6], bc <- [0,3,6]]
 
-{-deprune :: Sudoku -> Sudoku
-deprune s = _deprune s all_indices
+
+-- | Deeliminates over all values, all indices
+deeliminate_all :: Sudoku -> Sudoku
+deeliminate_all s = _deelim s vis
   where
-    _deprune s (is:rest) = _deprune s' rest 
-      where
-        s' = deeliminate s value 
--}
+    vis = [(v,is) | v <- [1..9], is <- all_indices]
+    _deelim s [] = s
+    _deelim s ((v,is) : rest) = _deelim (deeliminate s v is) rest
+
+
+

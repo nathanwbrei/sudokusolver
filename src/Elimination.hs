@@ -7,6 +7,7 @@ module Elimination
 
 
 import Data.Array
+import Deelimination
 import Data.List
 import Sudoku
 
@@ -64,10 +65,11 @@ progress (Sudoku s) = foldr f 0 s
 pruneRepeated :: Sudoku -> Sudoku
 pruneRepeated s = f s (progress s)
   where
-    f s p = if (p' == p) then s' else f s' p'
+    f s p = if (p' == p) then s'' else f s'' p'
             where
               s' = mapCells (prune s) promote
-              p' = progress s'
+              s'' = deeliminate_all s'
+              p' = progress s''
 
 
 
